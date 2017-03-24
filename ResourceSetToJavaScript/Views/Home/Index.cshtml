@@ -1,0 +1,78 @@
+﻿@using System.Globalization;
+@using System.Collections;
+@using System.Text;
+@using System.Resources;
+@using System.Reflection;
+@using System.Text.RegularExpressions;
+
+@{
+    Layout = null;
+}
+
+
+@{
+    // Every time some Resource file is added, need to at it here as well to be allowed to use it inside the .js files
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
+    // HOW TO USE IT?:
+    // inside the .js file or even .cshtml file...
+    //////////////////////////////////////////////////////////////
+    // <script>
+    //     console.log( Resource1ResourceObj["String1"] );
+    // </script>
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
+    int firstResource = 0;
+    ResourceSet resourceSet = null;
+    var sb = new StringBuilder("  ");
+    
+    Tuple<string, ResourceSet>[] resourcesList = {
+        new Tuple<string, ResourceSet>("Resource1", Resources.Resource1.ResourceManager.GetResourceSet(CultureInfo.CurrentUICulture, true, true)),
+        new Tuple<string, ResourceSet>("Resource2", Resources.Resource2.ResourceManager.GetResourceSet(CultureInfo.CurrentUICulture, true, true)),
+    };
+
+    foreach (var item in resourcesList)
+    {
+        firstResource = 0;
+        resourceSet = item.Item2;
+        sb.Append(" var " + item.Item1 + "ResourceObj = {");
+        var resEnum = resourceSet.GetEnumerator();
+        while (resEnum.MoveNext())
+        {
+            if (firstResource > 0)
+            {
+                sb.Append(",");
+            }
+            firstResource += 1;
+            sb.Append("\"" + resEnum.Key + "\":\"" + resEnum.Value.ToString().Replace("\r\n", "").Replace("\"", "\\\"") + "\"");
+        }
+        sb.Append("};");
+    }
+
+}
+
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Index</title>
+
+    <script>
+        @(Html.Raw(sb.ToString()));
+    </script>
+
+</head>
+<body>
+    <div>
+        <script>
+            console.log( Resource1ResourceObj["String1"] );
+            console.log( Resource1ResourceObj["String2"] );
+            console.log( Resource2ResourceObj["String1"] );
+            console.log( Resource2ResourceObj["String2"] );
+        </script>
+    </div>
+</body>
+</html>
